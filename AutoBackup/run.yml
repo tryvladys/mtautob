@@ -1,0 +1,14 @@
+---
+- name: Scheduled RSC
+  hosts: all
+  tasks: 
+    - name: "Script executing"
+      ansible.builtin.cron:
+       name: " Backup Schedule Setup "
+       state: present
+       minute: "*"
+       hour: "*"
+       day: "*"
+       month: "*"
+       weekday: "*"
+       job: ' AutoBackup/runscript.sh '

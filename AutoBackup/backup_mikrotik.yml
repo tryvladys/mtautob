@@ -1,0 +1,27 @@
+---
+- name: Backup Mikrotik
+  hosts: mikrotik
+  connection: local
+  gather_facts: false
+  vars:
+    backup_dir: "~/AutoBackup/backups"
+  tasks:
+  
+    - name: Export executing >>>
+      ansible.builtin.shell: >-
+                sshpass -p '{{ ansible_password }}' ssh -o StrictHostKeyChecking=no {{ ansible_user }}@{{ inventory_hostname }} /export verbose hide-sensitive       
+      register: export
+                     
+    - name: Saving rsc file >>>
+      ansible.builtin.copy:
+        content: "{{ export.stdout }}"
+        dest: "{{ backup_dir }}/{{ inventory_hostname }}.rsc"
+        
+    - name: Backup executing >>>
+      ansible.builtin.shell: >-
+       sshpass -p '{{ ansible_password }}' ssh -o StrictHostKeyChecking=no {{ ansible_user }}@{{ inventory_hostname }}  /system/backup/save name=backfile
+       
+    - name: Saving backup file >>>
+      ansible.builtin.shell: >-
+       sftp -i ~/.ssh/id_rsa backrsc@{{ inventory_hostname }}:backfile.backup ./AutoBackup/backups/{{ inventory_hostname }}.backup
+
